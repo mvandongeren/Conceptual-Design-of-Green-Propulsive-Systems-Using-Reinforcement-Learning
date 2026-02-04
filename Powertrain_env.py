@@ -189,30 +189,30 @@ class Powertrain(Env):
                 self.decision_type = -1
 
                 # Choose the energy source(s) from the available options
-                action = [1, 0, 0]
                 energy_sources = ['KeroseneStorage', 'HydrogenStorage', 'Battery']
                 starting_components = list(compress(energy_sources, action[:self.bit_width]))
 
-                self.energy_source = 'NO Hydrogen'
-                # if sum(action) == 1:
-                #     self.n_energy_sources = 1
-                #     if action[0] == 1:
-                #         self.energy_source = 'Kerosene'
-                #     if action[1] == 1:
-                #         self.energy_source = 'Hydrogen'
-                #     elif action[2] == 1:
-                #         self.energy_source = 'Batteries'
-                # elif sum(action) == 2:
-                #     self.n_energy_sources = 2
-                #     if action[0] == 1 and action[1] == 1:
-                #         self.energy_source = 'Kerosene and Hydrogen'
-                #     elif action[0] == 1 and action[2] == 1:
-                #         self.energy_source = 'Kerosene and Batteries'
-                #     elif action[1] == 1 and action[2] == 1:
-                #         self.energy_source = 'Hydrogen and Batteries'
-                # elif sum(action) == 3:
-                #     self.n_energy_sources = 3
-                #     self.energy_source = 'Kerosene, Hydrogen, and Batteries'
+                # Uncomment when plotting hydrogen architectures boxplot
+                #self.energy_source = 'NO Hydrogen'
+                if sum(action) == 1:
+                    self.n_energy_sources = 1
+                    if action[0] == 1:
+                        self.energy_source = 'Kerosene'
+                    if action[1] == 1:
+                        self.energy_source = 'Hydrogen'
+                    elif action[2] == 1:
+                        self.energy_source = 'Batteries'
+                elif sum(action) == 2:
+                    self.n_energy_sources = 2
+                    if action[0] == 1 and action[1] == 1:
+                        self.energy_source = 'Kerosene and Hydrogen'
+                    elif action[0] == 1 and action[2] == 1:
+                        self.energy_source = 'Kerosene and Batteries'
+                    elif action[1] == 1 and action[2] == 1:
+                        self.energy_source = 'Hydrogen and Batteries'
+                elif sum(action) == 3:
+                    self.n_energy_sources = 3
+                    self.energy_source = 'Kerosene, Hydrogen, and Batteries'
                 # Loop to assign energy sources to a branch
                 for i in range(0, len(starting_components)):
                     comp = Component.name_registry[starting_components[i]]
@@ -316,12 +316,6 @@ class Powertrain(Env):
         if existing is None:
             self.tracking_powermanagements[cls].append([branch_id, comp])
             return False, False
-
-        # Option to choose between seperate or merging powermanagement systems
-        # decision = randrange(2)
-        # if self.decision_type == 1:
-        #     decision = 1
-
         decision = 1
 
         # Option to not merge powermanagement systems, but keep them seperate and not connect them either
@@ -345,7 +339,6 @@ class Powertrain(Env):
             ### with the gas turbine and only one propulsive line is added to the powermanagement system
             if self.decision_type == 1:
                 self.decision_type = -1
-                #action = np.array([0, 0, 0])
                 parallel_option = action[:self.bit_width]
                 # Set the variable to true as there is a propeller connected to the gas turbine shaft
                 if parallel_option == 0:
@@ -440,7 +433,6 @@ class Powertrain(Env):
             # Choice of how many motors should be added to the pm
             if self.decision_type == 2:
                 self.decision_type = -1
-                action = [1, 0, 0]
                 self.add_n_motors = sum(action[:self.bit_width]) - 1
             # Notify the agent that a decision of type 2 must be made
             elif self.decision_type == -1:
@@ -458,17 +450,13 @@ class Powertrain(Env):
             # Choose successor(s) if multiple are available
             if self.decision_type == 3:
                 self.decision_type = -1
-                #action = [1, 1, 0]
-                if successors[1]().name == 'FuelCell':
-                    action = [1, 1, 0]
-                else:
-                    action = [1, 0, 0]
                 successors = list(compress(successors, action[:self.bit_width]))
-                for i in range(0, len(successors)):
-                    if successors[i]().name == 'FuelCell':
-                        self.energy_source = 'FC'
-                    elif successors[i]().name == 'GasTurbine':
-                        self.energy_source = 'NO FC'
+                # Uncomment when plotting hydrogen architectures boxplot
+                # for i in range(0, len(successors)):
+                #     if successors[i]().name == 'FuelCell':
+                #         self.energy_source = 'FC'
+                #     elif successors[i]().name == 'GasTurbine':
+                #         self.energy_source = 'NO FC'
             # notify the agent that a decision of type 3 must be made
             elif self.decision_type == -1:
                 self.decision_type = 3
@@ -816,42 +804,6 @@ class Powertrain(Env):
                 A_obj[self.connections-1, column] = 1
         return powerpaths, A_obj, self.components
 
-def combinations(step_size):
-    from collections import Counter
-    unique_ids = set()
-    counts_by_k = Counter()  # How many uniques per control-parameter count k
-
-    for i in range(0, 10000):
-        #print('#################### seed:', i, '####################')
-        env = Powertrain()
-        env.action_space.seed(i)
-        random.seed(i)
-        obs = env.reset()
-        done = False
-
-        while not done:
-            action = env.action_space.sample()
-            obs, reward, done, info = env.step(action)
-        _, _, _ = env.matrix()
-
-        gid = env.graph_id
-        if gid not in unique_ids:
-            unique_ids.add(gid)
-
-            # Count control parameters for this unique architecture
-            n_c = len(env.supply_param) + len(env.shaft_param)
-            counts_by_k[n_c] += 1
-
-        env.close()
-
-    print('Number of unique architectures:', len(unique_ids))
-    for k in range(0, len(counts_by_k)):
-        print(f'k={k}: {counts_by_k[k]}')
-
-    # Total control-setting combinations at 0.1 resolution (11 values per parameter)
-    total_combos = sum(((1/step_size+1) ** k) * c for k, c in counts_by_k.items())
-    print('Total control-setting combinations (at 0.1 steps):', total_combos)
-
 def unique_architectures():
     unique_ids = set()
     unique_architectures = []
@@ -859,23 +811,12 @@ def unique_architectures():
     energy_sources = []
     max_controls = 0
     max_size = 0
-    i = -1
     j = 1
-    new_architectures = [4,5,13,14,19,21,23,26,28,42,55,61,66,70,71,76,78,82,87,88,124,160,174,184,243,264]
-    unique_configurations = [0, 1, 2, 4, 5, 8, 9, 10, 12, 13, 14, 15, 18, 19, 21, 23, 26, 28, 29, 34, 41, 42, 43, 45,
-                             48, 55, 61, 62, 64, 66, 68, 70, 71, 73, 76, 78, 82, 87, 88, 98, 124, 155, 160, 174, 184,
-                             243, 257, 264]
-    borgia_configurations = [0, 1, 2, 8, 9, 10, 12, 15, 18, 29, 34, 41, 43, 45,
-                             48, 62, 64, 68, 73, 98, 155, 257]
 
-    # while len(unique_architectures) < 1:
-    #     i += 1
     for i in range(0,3000):
         actions = []
-        #print('#################### seed:', i, '####################')
         env = Powertrain()
         env.action_space.seed(i)
-        #random.seed(i)
         obs = env.reset()
         done = False
 
@@ -890,45 +831,19 @@ def unique_architectures():
             print('###################', j)
             j+=1
             env.describe()
-            #print(env.energy_source)
             unique_ids.add(gid)
             unique_architectures.append([powerpaths, matrix, components])
             unique_actions.append(actions)
             energy_sources.append(env.energy_source)
-            #plt.show()
-            #input('Press Enter')
         if matrix.shape[0] > max_size:
             max_size=matrix.shape[0]
         if len(env.supply_param) + len(env.shaft_param) > max_controls:
             max_controls = len(env.supply_param) + len(env.shaft_param)
         env.close()
-    #print(i)
-    #print(unique_architectures)
     print(len(unique_architectures))
     return unique_actions, energy_sources
 
-def test(n_seeds):
-    max_matrix_size = 0
-    max_action_size = 0
-    for i in range(0, n_seeds):
-        #print('#################### seed:', i, '####################')
-        env = Powertrain()
-        env.action_space.seed(i)
-
-        obs = env.reset()
-        done = False
-
-        while not done:
-            action = env.action_space.sample()
-            obs, reward, done, info = env.step(action)
-        _, matrix, _ = env.matrix()
-        if matrix.shape[0] > max_matrix_size:
-            max_matrix_size = matrix.shape[0]
-        if len(env.shaft_param) + len(env.supply_param) > max_action_size:
-            max_action_size = len(env.shaft_param) + len(env.supply_param)
-
 if __name__ == '__main__':
-    #combinations(0.1)
     from Characteristics import CHARACTERISTICS2030 as CHARACTERISTICS
     Component.set_characteristics(CHARACTERISTICS)
     unique_actions, energy_sources = unique_architectures()

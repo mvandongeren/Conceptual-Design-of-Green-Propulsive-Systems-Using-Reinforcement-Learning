@@ -16,7 +16,7 @@ def plottingNominal():
             data = json.load(f)
         return data[name]
 
-    file_name = "PAS20302"
+    file_name = "PAS2030"
 
     rewards_random_avg_30_pas = load_list(file_name, "rewards_random_avg")
     rewards_model_v2_30_pas = load_list(file_name, "rewards_model_v2")
@@ -25,14 +25,7 @@ def plottingNominal():
     rewards_model_v5_30_pas = load_list(file_name, "rewards_model_v5")
     rewards_model_v6_30_pas = load_list(file_name, "rewards_model_v6")
 
-    # print('############### 2030 ###############')
-    # print(rewards_model_v2_30)
-    # print(rewards_model_v3_30)
-    # print(rewards_model_v4_30)
-    # print(rewards_model_v5_30)
-    # print(rewards_model_v6_30)
-
-    file_name = "PAS20402"
+    file_name = "PAS2040"
 
     rewards_random_avg_40_pas = load_list(file_name, "rewards_random_avg")
     rewards_model_v2_40_pas = load_list(file_name, "rewards_model_v2")
@@ -41,14 +34,7 @@ def plottingNominal():
     rewards_model_v5_40_pas = load_list(file_name, "rewards_model_v5")
     rewards_model_v6_40_pas = load_list(file_name, "rewards_model_v6")
 
-    # print('############### 2040 ###############')
-    # print(rewards_model_v2_40)
-    # print(rewards_model_v3_40)
-    # print(rewards_model_v4_40)
-    # print(rewards_model_v5_40)
-    # print(rewards_model_v6_40)
-
-    file_name = "PAS20502"
+    file_name = "PAS2050"
 
     rewards_random_avg_50_pas = load_list(file_name, "rewards_random_avg")
     rewards_model_v2_50_pas = load_list(file_name, "rewards_model_v2")
@@ -57,14 +43,7 @@ def plottingNominal():
     rewards_model_v5_50_pas = load_list(file_name, "rewards_model_v5")
     rewards_model_v6_50_pas = load_list(file_name, "rewards_model_v6")
 
-    # print('############### 2050 ###############')
-    # print(rewards_model_v2_50)
-    # print(rewards_model_v3_50)
-    # print(rewards_model_v4_50)
-    # print(rewards_model_v5_50)
-    # print(rewards_model_v6_50)
-    #
-    file_name = "CARGO20302"
+    file_name = "CARGO2030"
 
     rewards_random_avg_30_cargo = load_list(file_name, "rewards_random_avg")
     rewards_model_v2_30_cargo = load_list(file_name, "rewards_model_v2")
@@ -73,7 +52,7 @@ def plottingNominal():
     rewards_model_v5_30_cargo = load_list(file_name, "rewards_model_v5")
     rewards_model_v6_30_cargo = load_list(file_name, "rewards_model_v6")
 
-    file_name = "CARGO20402"
+    file_name = "CARGO2040"
 
     rewards_random_avg_40_cargo = load_list(file_name, "rewards_random_avg")
     rewards_model_v2_40_cargo = load_list(file_name, "rewards_model_v2")
@@ -82,7 +61,7 @@ def plottingNominal():
     rewards_model_v5_40_cargo = load_list(file_name, "rewards_model_v5")
     rewards_model_v6_40_cargo = load_list(file_name, "rewards_model_v6")
 
-    file_name = "CARGO20502"
+    file_name = "CARGO2050"
 
     rewards_random_avg_50_cargo = load_list(file_name, "rewards_random_avg")
     rewards_model_v2_50_cargo = load_list(file_name, "rewards_model_v2")
@@ -969,32 +948,6 @@ def breakdowns2030():
         'ERF': 293.5160354745374,  # mW/m^2
     }
 
-    RL2030_OLD = {
-        'CJF': 1438.761935,  #kg
-        r'H$_2$': 1916.4695043749998,  #kg
-        'GT': 965.6638594164456, #kg
-        'FC': 892.6207954545454, #kg
-        'EM': 73.64121685606061, #kg
-        'PM': 32.72942916666667, #kg
-        #'OEM - Powertrain': 12543, #kg
-        'Payload': 5137.113259731282,  # kg
-        'Payload_r': 0, #kg
-        'ERF': 164.0539271968232, #mW/m^2
-    }
-
-    CMA2030_OLD = {
-        'CJF': 877.33679109375,  #kg
-        r'H$_2$': 3354.1315789854434,  #kg
-        'GT': 592.8132625994695, #kg
-        'FC': 1460.0213636363635, #kg
-        'EM': 120.45176136363636, #kg
-        'PM': 53.53411666666667, #kg
-        #'OEM - Powertrain': 12543, #kg
-        'Payload': 3998.7111256546705,  # kg
-        'Payload_r': 0, # kg
-        'ERF': 100.00127954058571,  # mW/m^2
-    }
-
     RL2030 = {
         'CJF': 1190.7254128571428,  #kg
         r'H$_2$': 2552.5459591666668,  #kg
@@ -1426,36 +1379,6 @@ def breakdownsFP():
         'ytick.labelsize': size,
         'legend.fontsize': size,
     })
-
-    RLFP2050_OLD = {
-        'CJF': 345.3481964941406,  #kg
-        r'H$_2$': 2419.700074060998,  #kg
-        'GT': 579.7615384615385, #kg
-        'FC': 1506.4854895104895, #kg
-        'EM': (65.40573559670781+ 37.00130401234568), #kg
-        'PM': 55.23780128205128, #kg
-        #'OEM - Powertrain': 12543, #kg
-        'Payload': 5448.059860581729,  # kg
-        'Payload_r': -0.31620066389973545, # kg
-        'ERF': 35.00747267281456,  # mW/m^2
-        'CO2': 1060.9864036736653, # -
-        'NOX': 1.2422237529346352, #-
-    }
-
-    CMAESFP2050_OLD = {
-        'CJF': 488.4424216071429,  #kg
-        r'H$_2$': 2298.519755029473,  #kg
-        'GT': 537.3055039787798, #kg
-        'FC': 1256.5574300699302, #kg
-        'EM': 73.20610596707819, #kg
-        'PM': 46.07377243589743, #kg
-        #'OEM - Powertrain': 12543, #kg
-        'Payload': 5756.895010911698,  # kg
-        'Payload_r': 0, # kg
-        'ERF': 54.946556541971226,  # mW/m^2
-        'CO2': 1500.6036619375,  # -
-        'NOX': 3.166271478903675,  # -
-    }
 
     RLFP2050 = {
         'CJF': 342.44495750000004,  #kg

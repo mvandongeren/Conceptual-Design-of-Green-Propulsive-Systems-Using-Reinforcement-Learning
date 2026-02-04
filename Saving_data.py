@@ -1199,11 +1199,8 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
                     action = env.action_space.sample()
                     obs, reward, done, info = env.step(action)
                 rewards_random_loop.append(reward)
-            #print('Random reward:', np.mean(rewards_random_loop))
             rewards_random_avg.append([np.mean(rewards_random_loop), energy_sources[i], i, []])
 
-        actions_CMAES2030 = np.array([0.2923671230273646, 0.2035511422335083, 0.0002818876379002, 0.3832732153268882, 0.0000352843434683, 0.4896486792013638, 0.3563330765201214, 0.191987838672985 ])
-        actions_CMAESFP = np.array([0.661280472542637,  0.338592856557519,  0.5749760903544284, 0.4248270735587058, 0.0000043516061392, 0.5582157107063982, 0.0003883454637565, 0.997874984791806])
         if 2 >= start_number and end_number >= 2:
             # Use model v2 to predict action
             rewards_v2 = []
@@ -1216,19 +1213,14 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
                 j = 0
                 while not done:
                     action, _ = model_v2.predict(obs, deterministic=deterministic)
-                    for l in range(0, n_cp):
-                            action[l] = actions_CMAESFP[n_cp * j + l]
-                    #         print(action)
                     obs, reward, done, info = env.step(action)
                     j += 1
-                #print('V2 reward:', reward)
                 rewards_v2.append(reward)
             if reward> highest_reward:
                 highest_reward = reward
             print('V2 highest reward:', highest_reward)
             rewards_model_v2.append([np.mean(rewards_v2), energy_sources[i], i, str(info.get("Supply_Parameters"))])
 
-        actions_CMAESFP2 = np.array([0, 0.338592856557519, 0, 0.4248270735587058, 0.1122, 0.5582157107063982, 0.0003883454637565, 0.997874984791806])
         if 3 >= start_number and end_number >= 3:
             # Use model v3 to predict action
             rewards_v3 = []
@@ -1244,7 +1236,6 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
                             action[l] = actions_CMAESFP2[n_cp * j + l]
                     obs, reward, done, info = env.step(action)
                     j+=1
-                #print('V3 reward:', reward)
                 rewards_v3.append(reward)
             if reward > highest_reward:
                 highest_reward = reward
@@ -1262,20 +1253,18 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
                 j=0
                 while not done:
                     action, _ = model_v4.predict(obs, deterministic=deterministic)
-                    # for l in range(0, n_cp):
-                    #     action[l] = actions_Pas2030_2[n_cp * j + l]
                     obs, reward, done, info = env.step(action)
                     j+=1
                 rewards_v4.append(reward)
             if reward > highest_reward:
                 highest_reward = reward
             print('V4 highest reward:', highest_reward)
-            #print('V4 reward:', reward)
             rewards_model_v4.append([np.mean(rewards_v4), energy_sources[i], i, str(info.get("Supply_Parameters"))])
 
         if 5 >= start_number and end_number >= 5:
             # Use model v5 to predict action
             rewards_v5 = []
+            highest_reward = -10
             for k in range(0, n_samples):
                 powerpaths, matrix, components = pt.matrix()
                 obs = env.reset(pt, powerpaths, matrix, components)
@@ -1283,13 +1272,16 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
                 while not done:
                     action, _ = model_v5.predict(obs, deterministic=deterministic)
                     obs, reward, done, info = env.step(action)
-                print('V5 reward:', reward)
                 rewards_v5.append(reward)
+            if reward > highest_reward:
+                highest_reward = reward
+            print('V5 highest reward:', highest_reward)
             rewards_model_v5.append([np.mean(rewards_v5), energy_sources[i], i, str(info.get("Supply_Parameters"))])
 
         if 6 >= start_number and end_number == 6:
             # Use model v6 to predict action
             rewards_v6 = []
+            highest_reward = -10
             for k in range(0, n_samples):
                 powerpaths, matrix, components = pt.matrix()
                 obs = env.reset(pt, powerpaths, matrix, components)
@@ -1297,12 +1289,16 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
                 while not done:
                     action, _ = model_v6.predict(obs, deterministic=deterministic)
                     obs, reward, done, info = env.step(action)
-                print('V6 reward:', reward)
                 rewards_v6.append(reward)
+            if reward > highest_reward:
+                highest_reward = reward
+            print('V6 highest reward:', highest_reward)
             rewards_model_v6.append([np.mean(rewards_v6), energy_sources[i], i, str(info.get("Supply_Parameters"))])
 
-    #cat_order = ['Kerosene', 'Hydrogen', 'Batteries', 'Kerosene and Hydrogen', 'Kerosene and Batteries', 'Hydrogen and Batteries', 'Kerosene, Hydrogen, and Batteries']
-    cat_order = ['FC', 'NO FC']
+    cat_order = ['Kerosene', 'Hydrogen', 'Batteries', 'Kerosene and Hydrogen', 'Kerosene and Batteries', 'Hydrogen and Batteries', 'Kerosene, Hydrogen, and Batteries']
+
+    # Uncomment for plotting hydrogen architectures boxplot
+    #cat_order = ['FC', 'NO FC']
     cat_rank = {c: i for i, c in enumerate(cat_order)}
 
     def reorder_by_type(items, rank=cat_rank):
@@ -1359,9 +1355,9 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
 
     if saving == True:
         if CARGO == True:
-            file_name = f"CARGO{year}FC2"
+            file_name = f"CARGO{year}FC"
         else:
-            file_name = f"PAS{year}FC2"
+            file_name = f"PAS{year}FC"
 
         args_to_save = [file_name]
 
@@ -1475,7 +1471,5 @@ def cma(CARGO, FP2050, year):
     print(highest_reward_arch)
 
 if __name__ == '__main__':
-    print('2050')
-    saving_data(True, True, 2, 3, 'Training_FP_final', 2050, 1, True, False, False)
-    # for i in range(0,1):
-    #      cma(False, True, 2050)
+    saving_data(False, False, 2, 6, 'Training', 2030, 1, True, False, False)
+    cma(False, True, 2050)

@@ -266,9 +266,7 @@ FLIGHT_CHARACTERISTICS: Dict[int, Dict[str, Any]] = {
         'Power': 2.95*10**6/2,   # W
         'Duration': 30,       # seconds
         'Kerosene_ERF': 0.1134 - 0.0234, #mW/m^2 per kg of fuel used
-        #'Hydrogen_ERF': 0.0044,  # mW/m^2 per kg of fuel used
         'EI_CO2': 3.16, # kg/kg
-        #'EI_NOx': 16.73, # g/kg
         'Temperature': 288.15, # K
         'Pressure': 101325, #Pa
         'HumidityCorrection': -0.0618368, #Humidity correction
@@ -278,9 +276,7 @@ FLIGHT_CHARACTERISTICS: Dict[int, Dict[str, Any]] = {
         'Power': 2.47 * 10 ** 6/2,  # W
         'Duration': 21*60,  # seconds
         'Kerosene_ERF': 0.1134 - 0.0234, #mW/m^2 per kg of fuel used
-        #'Hydrogen_ERF': 0.0035,  # mW/m^2 per kg of fuel used
         'EI_CO2': 3.16,  # kg/kg
-        #'EI_NOx': 13.29,  # g/kg
         'Temperature': 264.38,  # K
         'Pressure': 64437.5,  # Pa
         'HumidityCorrection': 0.093639,  # Humidity correction
@@ -290,9 +286,7 @@ FLIGHT_CHARACTERISTICS: Dict[int, Dict[str, Any]] = {
         'Power': 2.02 * 10 ** 6/2,  # W
         'Duration': 146*60,  # seconds
         'Kerosene_ERF': 0.1134 - 0.0234, #mW/m^2 per kg of fuel used
-        #'Hydrogen_ERF': 0.0023,  # mW/m^2 per kg of fuel used
         'EI_CO2': 3.16,  # kg/kg
-        #'EI_NOx': 8.765,  # g/kg
         'Temperature': 240.6,  # K
         'Pressure': 39272.1,  # Pa
         'HumidityCorrection': 0.117302,  # Humidity correction
@@ -302,9 +296,7 @@ FLIGHT_CHARACTERISTICS: Dict[int, Dict[str, Any]] = {
         'Power': 0.874 * 10 ** 6/2,  # W
         'Duration': 6*60,  # seconds
         'Kerosene_ERF': 0.1134 - 0.0234, #mW/m^2 per kg of fuel used
-        #'Hydrogen_ERF': 0.0017,  # mW/m^2 per kg of fuel used
         'EI_CO2': 3.16,  # kg/kg
-        #'EI_NOx': 6.345,  # g/kg
         'Temperature': 264.38,  # K
         'Pressure': 64437.5,  # Pa
         'HumidityCorrection': 0.093639,  # Humidity correction

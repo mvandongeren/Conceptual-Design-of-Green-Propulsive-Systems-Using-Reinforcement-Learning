@@ -171,4 +171,4 @@ def initialize_training(start_seed, end_seed, CARGO, FP2050, year, directory, te
         SACtraining(env, directory, model_name, option, replay_name, seed, year)
 
 if __name__ == '__main__':
-    initialize_training(0, 5, True, False, 2050, 'Training_cargo_final2', False)
+    initialize_training(0, 5, True, False, 2030, 'Training', False)
