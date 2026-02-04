@@ -325,7 +325,7 @@ DATA = {
     'ForwardBackLower': 18, #m
     'AftBackLower': 21, #m
     'BackLowerVolume': 1.09*(21-18)*1000, #L
-    'MOTM': 23000, #kg
+    'MTOM': 23000, #kg
     'OEW-PropSystemMass': 12543, #kg
     'OEW-PropSystemArm': 13.91, #kg
 }
