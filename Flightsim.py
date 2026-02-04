@@ -300,7 +300,7 @@ class FlightSimulation(gym.Env):
             # Add ERF from NOx
             self._erf_nox()
 
-            MTOM = 23000
+            MTOM = DATA['MTOM']
             # Compute maximum payload
             payload = MTOM - 12543 - fuel_weight - component_weight + battery_redundant_weight
 
@@ -355,17 +355,6 @@ class FlightSimulation(gym.Env):
                             diff = MAC_for - (arm - 13.604) / 2.303 * 100
 
                         if MAC_for - diff > 39:
-                            # if i != 0:
-                            #     self.pt.describe()
-                            #     print(self.ENERGY_SOURCE_DATA)
-                            #     print(self.COMPONENT_DATA)
-                            #     print(self.actions)
-                            #     print(kerosene_fuel_used, hydrogen_fuel_used)
-                            #     print(MAC_for)
-                            #     print(diff)
-                            #     print(self.SUPPLY_POWERPATHS)
-                            #     print(payload)
-                            #     raise ValueError('CG too far aft, after burning fuel')
                             done = True
                             info = {"Supply_Parameters": self.SUPPLY_POWERPATHS}
                             reward = - abs(MAC_for-diff)/39
@@ -383,7 +372,7 @@ class FlightSimulation(gym.Env):
                                 raise ValueError('CG moves into forward infeasible')
 
             co2_pp_baseline = 8080.78997925 / 6807.853228990148
-            nox_pp_baseline = 31660.564192850526  # /6784.492491428571
+            nox_pp_baseline = 31660.564192850526
             co2_pp_threshold = co2_pp_baseline * 0.25
             nox_pp_threshold = nox_pp_baseline * 0.1
 
@@ -395,17 +384,17 @@ class FlightSimulation(gym.Env):
             # print('Payload reduction:', (650 - fuel_used))
             # print(self.co2_emissions, self.nox_emissions, payload)
             co2_dif_threshold = co2_pp_threshold - self.co2_emissions / payload
-            nox_dif_threshold = nox_pp_threshold - self.nox_emissions*1000  # /payload
+            nox_dif_threshold = nox_pp_threshold - self.nox_emissions*1000
 
             # Theoretical reward of a standard ATR-72 flight
-            baseline = 7246.232393990147/293.5160354745374   #37.690532847510646 #37.99753317616675 #40.29136659424733 #0.0247552
+            baseline = 7246.232393990147/293.5160354745374
 
             #Calculate the reward based on the maximum allowable payload and erf, avoid division by zero
             if payload > 0:
 
                 def FP2050():
                     n = 1
-                    reward = payload / 755.9360369704433 #* np.log(payload / 755.9360369704433 * n +1)/np.log(10*n+1)
+                    reward = payload / 755.9360369704433
                     if co2_dif_threshold < 0 or nox_dif_threshold < 0:
                         summ = np.min([co2_dif_threshold, 0]) + np.min([nox_dif_threshold / payload, 0])
                         reward = (payload / 755.9360369704433 -1) * np.exp(10*summ)
