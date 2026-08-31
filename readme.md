@@ -39,7 +39,6 @@ self.x
 self.ENERGY_SOURCE_DATA
 self.COMPONENT_DATA
 payload
-self.erf
 self.co2_emissions
 self.nox_emissions
 ```
