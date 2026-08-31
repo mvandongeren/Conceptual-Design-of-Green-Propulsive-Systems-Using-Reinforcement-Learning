@@ -380,7 +380,7 @@ class FlightSimulation(gym.Env):
             # print(self.x)
             # print(self.ENERGY_SOURCE_DATA)
             # print(self.COMPONENT_DATA)
-            # print(payload, self.erf)
+            # print(payload)
             # print('Payload reduction:', (650 - fuel_used))
             # print(self.co2_emissions, self.nox_emissions, payload)
             co2_dif_threshold = co2_pp_threshold - self.co2_emissions / payload
@@ -393,7 +393,6 @@ class FlightSimulation(gym.Env):
             if payload > 0:
 
                 def FP2050():
-                    n = 1
                     reward = payload / 755.9360369704433
                     if co2_dif_threshold < 0 or nox_dif_threshold < 0:
                         summ = np.min([co2_dif_threshold, 0]) + np.min([nox_dif_threshold / payload, 0])

@@ -369,7 +369,7 @@ class FlightSimulation(gym.Env):
             # print(self.x)
             # print(self.ENERGY_SOURCE_DATA)
             # print(self.COMPONENT_DATA)
-            # print(payload, self.erf)
+            # print(payload)
             # print('Payload reduction:', (650 - fuel_used))
             # print(self.co2_emissions, self.nox_emissions, payload)
             co2_dif_threshold = co2_pp_threshold - self.co2_emissions / payload
@@ -1087,28 +1087,46 @@ class ActionFeasibilityWrapper(gym.ActionWrapper):
                 # If the sum of the fixed ratio's and the set ratio's is larger than 1, the set ratio's must be reduced
                 while round(sum(shaft_ratios) + sum(action[-len(self.env.pt.shaft_param):]),6) > 1:
                     np.set_printoptions(precision=16, suppress=True)
-                    # Calculate the maximum sum of the set ratio's and the value by which the ratio's must be divided
-                    max_sum_shaft_param = 1 - sum(shaft_ratios)
-                    division = sum(action[len(self.env.pt.supply_param) : len(self.env.pt.supply_param) + len(self.env.pt.shaft_param)])/max_sum_shaft_param
-                    rounding = 6
-                    division = math.ceil(division*10**rounding)/10**6
-                    # print('Energy Harvesting Feasibility')
-                    # self.env.pt.describe()
-                    # print(action)
-                    # print(sum(shaft_ratios), sum(action[-len(self.env.pt.shaft_param):]))
-                    # print(max_sum_shaft_param, division)
-                    # Set the new ratio's
-                    action[len(self.env.pt.supply_param) : len(self.env.pt.supply_param) + len(self.env.pt.shaft_param)] = [param / division for param in action[len(self.env.pt.supply_param) : len(self.env.pt.supply_param) + len(self.env.pt.shaft_param)]]
-                    for i in range(0, len(self.env.pt.shaft_param)):
-                        self.env.pt.shaft_param.set(i, action[i + len(self.env.pt.supply_param)])
-                    A = self.env.to_numeric(self.env.A_obj)
-                    # Recalculate x
-                    x = np.linalg.solve(A, self.env.b)
-                    x = np.where(np.abs(x) < 1, 0.0, x)
-                    # Recalculate the fixed shaft ratio's
-                    shaft_ratios = []
-                    for powerpath in self.env.pt.defined_shafts_powerpaths:
-                        shaft_ratios.append(x[powerpath] / power * self.env.CHARACTERISTICS['Propeller']['efficiency'])
+                    if sum(shaft_ratios) == 1:
+                        # Set the new ratio's
+                        action[
+                        len(self.env.pt.supply_param): len(self.env.pt.supply_param) + len(self.env.pt.shaft_param)] = [
+                            0 for param in action[len(self.env.pt.supply_param): len(
+                                self.env.pt.supply_param) + len(self.env.pt.shaft_param)]]
+                        for i in range(0, len(self.env.pt.shaft_param)):
+                            self.env.pt.shaft_param.set(i, action[i + len(self.env.pt.supply_param)])
+                        A = self.env.to_numeric(self.env.A_obj)
+                        # Recalculate x
+                        x = np.linalg.solve(A, self.env.b)
+                        x = np.where(np.abs(x) < 1, 0.0, x)
+                        # Recalculate the fixed shaft ratio's
+                        shaft_ratios = []
+                        for powerpath in self.env.pt.defined_shafts_powerpaths:
+                            shaft_ratios.append(
+                                x[powerpath] / power * self.env.CHARACTERISTICS['Propeller']['efficiency'])
+                    else:
+                        # Calculate the maximum sum of the set ratio's and the value by which the ratio's must be divided
+                        max_sum_shaft_param = 1 - sum(shaft_ratios)
+                        division = sum(action[len(self.env.pt.supply_param) : len(self.env.pt.supply_param) + len(self.env.pt.shaft_param)])/max_sum_shaft_param
+                        rounding = 6
+                        division = math.ceil(division*10**rounding)/10**rounding
+                        # print('Energy Harvesting Feasibility')
+                        # self.env.pt.describe()
+                        # print(action)
+                        # print(sum(shaft_ratios), sum(action[-len(self.env.pt.shaft_param):]))
+                        # print(max_sum_shaft_param, division)
+                        # Set the new ratio's
+                        action[len(self.env.pt.supply_param) : len(self.env.pt.supply_param) + len(self.env.pt.shaft_param)] = [param / division for param in action[len(self.env.pt.supply_param) : len(self.env.pt.supply_param) + len(self.env.pt.shaft_param)]]
+                        for i in range(0, len(self.env.pt.shaft_param)):
+                            self.env.pt.shaft_param.set(i, action[i + len(self.env.pt.supply_param)])
+                        A = self.env.to_numeric(self.env.A_obj)
+                        # Recalculate x
+                        x = np.linalg.solve(A, self.env.b)
+                        x = np.where(np.abs(x) < 1, 0.0, x)
+                        # Recalculate the fixed shaft ratio's
+                        shaft_ratios = []
+                        for powerpath in self.env.pt.defined_shafts_powerpaths:
+                            shaft_ratios.append(x[powerpath] / power * self.env.CHARACTERISTICS['Propeller']['efficiency'])
 
         penalty = np.zeros((self.env.action_space.shape[0],), dtype=np.float32)
         penalty[:self.env.n_active_ctrl] = np.abs(action_raw - action)
@@ -1221,8 +1239,6 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
                 j = 0
                 while not done:
                     action, _ = model_v3.predict(obs, deterministic=deterministic)
-                    for l in range(0, n_cp):
-                            action[l] = actions_CMAESFP2[n_cp * j + l]
                     obs, reward, done, info = env.step(action)
                     j+=1
                 rewards_v3.append(reward)
@@ -1295,7 +1311,6 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
         items.sort(key=lambda it: rank.get(it[1], len(rank)))  # stable within type
         return items
 
-    # Apply to your four datasets
     if random == True:
         rewards_random_avg = reorder_by_type(rewards_random_avg)
     if 2 >= start_number and end_number >= 2:
@@ -1316,14 +1331,23 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
             ns = {**frm.f_globals, **frm.f_locals}
         filename = str(Path(filename).with_suffix(".json"))
 
-        # (optional) make numpy scalars JSON-safe
         try:
             import numpy as np
-            def _to_builtin(seq):
-                return [x.item() if isinstance(x, np.generic) else x for x in seq]
+            def _to_builtin(obj):
+                if isinstance(obj, np.generic):
+                    return obj.item()
+                elif isinstance(obj, (list, tuple)):
+                    return [_to_builtin(x) for x in obj]
+                elif isinstance(obj, dict):
+                    return {k: _to_builtin(v) for k, v in obj.items()}
+                return obj
         except Exception:
-            def _to_builtin(seq):
-                return list(seq)
+            def _to_builtin(obj):
+                if isinstance(obj, (list, tuple)):
+                    return [_to_builtin(x) for x in obj]
+                elif isinstance(obj, dict):
+                    return {k: _to_builtin(v) for k, v in obj.items()}
+                return obj
 
         data = {}
         # load existing file so multiple calls add/update keys
@@ -1344,9 +1368,9 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
 
     if saving == True:
         if CARGO == True:
-            file_name = f"CARGO{year}FC"
+            file_name = f"CARGO{year}"
         else:
-            file_name = f"PAS{year}FC"
+            file_name = f"FP{year}FC"
 
         args_to_save = [file_name]
 
@@ -1358,10 +1382,12 @@ def saving_data(CARGO, FP2050, start_number, end_number, directory, year, n_samp
 
         save_lists(*args_to_save)
 
-def cma(CARGO, FP2050, year):
+def cma(CARGO, FP2050, year, saving, start_number, end_number):
     CHARACTERISTICS = getattr(Characteristics, f"CHARACTERISTICS{year}")
     Component.set_characteristics(CHARACTERISTICS)
     env = ActionFeasibilityWrapper(FlightSimulation(CHARACTERISTICS, CARGO, FP2050))
+
+    rewards_model_v2 = []
 
     def set_seed(seed):
         np.random.seed(seed)
@@ -1371,6 +1397,8 @@ def cma(CARGO, FP2050, year):
 
     np.set_printoptions(precision=16, suppress=True)
     from cmaes import CMA
+    import time
+    start_time = time.time()
 
     target = 10
 
@@ -1384,10 +1412,14 @@ def cma(CARGO, FP2050, year):
     from Powertrain_env import unique_architectures
     unique_actions, energy_sources = unique_architectures()
 
-    generations = 1000
-    highest_reward = 0
+    generations = 1
+    highest_reward = -10
+    highest_reward_actions = 0
+    highest_reward_arch = 0
     for i in range(0,len(unique_actions)):
-        highest_reward_pa = 0
+        highest_reward_pa = -10
+        highest_reward_actions_pa = 0
+        highest_reward_arch_pa = 0
         print('#################### Architecture number:', i, ' ####################')
         # Initialize unique architecture based on saved actions
         obs = pt.reset()
@@ -1431,13 +1463,17 @@ def cma(CARGO, FP2050, year):
                 done_innerloop = False
 
                 j=0
-                action = np.array(optimizer.ask())
-                action[-1] = 1
-                action[-2] = 0
+                try:
+                    action = np.array(optimizer.ask())
+                except:
+                    done_innerloop = True
+                    reward = -10
+                # action[-1] = 1
+                # action[-2] = 0
                 while not done_innerloop:
                     sample_action = env.action_space.sample()
                     for l in range(0,n_cp):
-                        sample_action[l] = action[n_cp*j+l]
+                        sample_action[l] = round(action[n_cp*j+l],4)
                     j+=1
                     obs, reward, done_innerloop, info = env.step(sample_action)
                 if reward > highest_reward:
@@ -1452,13 +1488,71 @@ def cma(CARGO, FP2050, year):
                 solutions.append((action, score))
                 rewards.append(7-score)
             optimizer.tell(solutions)
+        rewards_model_v2.append([highest_reward_pa, energy_sources[i], i, highest_reward_actions_pa])
         print(highest_reward_pa)
         print(highest_reward_actions_pa)
         print(highest_reward_arch_pa)
+        print("--- %s seconds ---" % (time.time() - start_time))
+
+
+    def save_lists(filename, *names, ns=None):
+        if ns is None:
+            frm = inspect.currentframe().f_back
+            ns = {**frm.f_globals, **frm.f_locals}
+        filename = str(Path(filename).with_suffix(".json"))
+
+        try:
+            import numpy as np
+            def _to_builtin(obj):
+                # ADDED: Explicit handling for numpy arrays
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                elif isinstance(obj, np.generic):
+                    return obj.item()
+                elif isinstance(obj, (list, tuple)):
+                    return [_to_builtin(x) for x in obj]
+                elif isinstance(obj, dict):
+                    return {k: _to_builtin(v) for k, v in obj.items()}
+                return obj
+        except Exception:
+            def _to_builtin(obj):
+                if isinstance(obj, (list, tuple)):
+                    return [_to_builtin(x) for x in obj]
+                elif isinstance(obj, dict):
+                    return {k: _to_builtin(v) for k, v in obj.items()}
+                return obj
+
+        data = {}
+        if Path(filename).exists():
+            with open(filename, "r", encoding="utf-8") as f:
+                try:
+                    data = json.load(f)
+                except json.JSONDecodeError:
+                    data = {}
+
+        for name in names:
+            if name not in ns:
+                raise KeyError(f"'{name}' not found in caller scope")
+            data[name] = _to_builtin(ns[name])
+
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+
+    if saving == True:
+        file_name = f"1CMAES{year}FC"
+        args_to_save = [file_name]
+
+        for i in range(start_number, end_number + 1):
+            args_to_save.append(f"rewards_model_v{i}")
+
+        save_lists(*args_to_save)
+
+
     print(highest_reward)
     print(highest_reward_actions)
     print(highest_reward_arch)
+    print("--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == '__main__':
-    saving_data(False, False, 2, 6, 'Training', 2030, 1, True, False, False)
-    cma(False, True, 2050)
+    #saving_data(False, True, 4, 4, 'Training_FP2050_final', 2050, 1, True, False, False)
+    cma(False, True, 2050, True, 2, 2)
